@@ -19,6 +19,13 @@ end
 target 'App' do
   capacitor_pods
   # Add your Pods here
+  # Google's consent SDK (a transitive dependency pulled in by Google-Mobile-Ads-SDK, not
+  # declared directly by @capacitor-community/admob) shipped a breaking Swift API rename in
+  # its 3.0 release (UMPConsentInformation -> ConsentInformation, .sharedInstance -> .shared,
+  # etc.) that the currently installed admob plugin version doesn't use yet. Pin below that
+  # until the plugin itself updates - CocoaPods otherwise resolves to the newest compatible
+  # version automatically, which broke the build the day after this pin would've been needed.
+  pod 'GoogleUserMessagingPlatform', '< 3.0'
 end
 
 post_install do |installer|
