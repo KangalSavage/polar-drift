@@ -270,14 +270,17 @@ export class Game {
       const dir = o.side === 'left' ? 1 : -1; // "away from this wall" direction
       ax += dir * (sameCharge ? 1 : -1) * CONFIG.MAGNET_FORCE * proximity;
 
-      // Same charge = solid wall: hard-clamp so the ball visually can never tunnel into it.
+      // Same charge = solid wall: ease back to the boundary instead of snapping to it. The
+      // magnet force above should already keep the ball clear of this in the vast majority
+      // of cases - this is a safety net for the rare tight/fast case, so it needs to read as
+      // a quick glide, not a teleport, when it does kick in.
       if (sameCharge) {
-        if (o.side === 'left' && this.ballX - CONFIG.BALL_RADIUS < edgeX) {
-          this.ballX = edgeX + CONFIG.BALL_RADIUS;
-          if (this.ballVX < 0) this.ballVX = 0;
-        } else if (o.side === 'right' && this.ballX + CONFIG.BALL_RADIUS > edgeX) {
-          this.ballX = edgeX - CONFIG.BALL_RADIUS;
-          if (this.ballVX > 0) this.ballVX = 0;
+        const boundary = o.side === 'left' ? edgeX + CONFIG.BALL_RADIUS : edgeX - CONFIG.BALL_RADIUS;
+        const violating = o.side === 'left' ? this.ballX < boundary : this.ballX > boundary;
+        if (violating) {
+          this.ballX += (boundary - this.ballX) * Math.min(1, CONFIG.WALL_CORRECTION_RATE * dt);
+          if (o.side === 'left' && this.ballVX < 0) this.ballVX *= 0.3;
+          if (o.side === 'right' && this.ballVX > 0) this.ballVX *= 0.3;
         }
       }
     }

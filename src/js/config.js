@@ -12,9 +12,13 @@ export const CONFIG = {
 
   // Horizontal dynamics - a simple 1D spring/force model, not a full physics engine.
   CENTER_SPRING_K: 5.5, // pulls the ball back toward the shaft's center when no field is acting on it
-  MAGNET_FORCE: 780, // horizontal accel an active (in-range) obstacle's field applies
-  MAGNET_RANGE_PX: 170, // vertical distance (above/below the ball) within which a field acts
+  MAGNET_FORCE: 1150, // horizontal accel an active (in-range) obstacle's field applies - strong/early
+  // enough that the ball has usually already drifted into place well before the hard wall
+  // boundary below would ever need to correct it, so gliding is what reads on screen, not snapping.
+  MAGNET_RANGE_PX: 210, // vertical distance (above/below the ball) within which a field acts
   HORIZONTAL_DAMPING: 0.9, // per-frame-ish velocity decay, scaled by dt in code
+  WALL_CORRECTION_RATE: 20, // per-second ease rate for the same-charge hard wall boundary - a
+  // fast glide into place when it does need to correct, never an instant position snap
 
   // Difficulty ramp - flat grace window, then a smooth exponential ease toward the harder
   // ceiling. Same shape as Orbit Dash's curve on purpose: a proven, non-jarring feel.
