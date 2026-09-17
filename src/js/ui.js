@@ -14,18 +14,14 @@ export class UI {
     this.coinsEarnedRowEl = document.getElementById('coins-earned-row');
     this.coinsEarnedEl = document.getElementById('coins-earned');
     this.hudScoreEl = document.getElementById('hud-score');
-    this.hudFreezeEl = document.getElementById('hud-freeze');
-    this.nextPreviewEl = document.getElementById('next-preview');
-    this.nextPreviewLabelEl = document.getElementById('next-preview-label');
-    this.gestureHintsEl = document.getElementById('gesture-hints');
-    this.tiltLeftBtn = document.getElementById('tilt-left-btn');
-    this.tiltRightBtn = document.getElementById('tilt-right-btn');
+    this.hudShieldEl = document.getElementById('hud-shield');
     this.pauseOverlayEl = document.getElementById('pause-overlay');
     this.continueOverlayEl = document.getElementById('continue-overlay');
     this.continueTimerEl = document.getElementById('continue-timer');
     this.finalScoreEl = document.getElementById('final-score');
     this.finalBestScoreEl = document.getElementById('final-best-score');
     this.newBestBadgeEl = document.getElementById('new-best-badge');
+    this.gestureHintEl = document.getElementById('gesture-hint');
 
     this.themeRowEl = document.getElementById('theme-row');
 
@@ -68,30 +64,23 @@ export class UI {
     this.hudScoreEl.classList.toggle('new-best', isGold);
   }
 
-  setFreezeActive(active) {
-    this.hudFreezeEl.classList.toggle('hidden', !active);
-  }
-
-  /** Updates the "on deck" ball indicator - the queued ball itself is drawn live on the canvas. */
-  setNextPreview(color, label) {
-    this.nextPreviewEl.style.background = color;
-    this.nextPreviewLabelEl.textContent = label;
-  }
-
-  showGestureHints(show) {
-    this.gestureHintsEl.classList.toggle('hidden', !show);
+  setShieldActive(active) {
+    this.hudShieldEl.classList.toggle('hidden', !active);
   }
 
   setMuteIcon(soundEnabled) {
     this.muteIconEl.textContent = soundEnabled ? '🔊' : '🔇';
   }
 
+  showGestureHint(show) {
+    this.gestureHintEl.classList.toggle('hidden', !show);
+  }
+
   /**
-   * Rebuilds the jar-theme swatch row. A theme is unlocked once it's in `purchasedIndices`
-   * (bought with coins) or free (coinCost 0). A still-locked but affordable theme renders
-   * as "buyable" (shows its coin cost, tappable) instead of a plain lock icon.
-   * `onSelect(index)` fires for unlocked swatches, `onPurchase(index)` for buyable ones.
-   * Call again whenever coins/selection/purchases change.
+   * Rebuilds the ball/trail theme swatch row. A theme is unlocked once it's in
+   * `purchasedIndices` (bought with coins) or free (coinCost 0). A still-locked but
+   * affordable theme renders as "buyable" (shows its coin cost, tappable) instead of a
+   * plain lock icon. Call again whenever coins/selection/purchases change.
    */
   renderThemeRow(themes, selectedIndex, coins, purchasedIndices, onSelect, onPurchase) {
     this.themeRowEl.innerHTML = '';
@@ -99,7 +88,7 @@ export class UI {
       const unlocked = theme.coinCost === 0 || purchasedIndices.has(index);
       const btn = document.createElement('button');
       btn.className = 'theme-swatch';
-      btn.style.background = theme.colors.accent;
+      btn.style.background = theme.trailAccent;
       btn.setAttribute('aria-label', theme.name);
       if (index === selectedIndex) btn.classList.add('selected');
       if (unlocked) {

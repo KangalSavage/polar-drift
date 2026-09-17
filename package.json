@@ -1,7 +1,7 @@
 {
-  "name": "tilt-merge",
+  "name": "polar-drift",
   "version": "0.1.0",
-  "description": "Tilt Merge - physics-based merge puzzle. Tilt the jar, drop matching orbs, chain merges before it overflows.",
+  "description": "Polar Drift - one-tap magnetic-polarity survival. Flip charge to repel off matching walls and get pulled toward gems, never the wrong one.",
   "private": true,
   "scripts": {
     "dev": "esbuild src/js/main.js --bundle --outfile=www/js/bundle.js --servedir=www --watch=forever",

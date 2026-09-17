@@ -5,7 +5,6 @@ import { UI } from './ui.js';
 import { AudioManager } from './audio.js';
 import { Vibe } from './haptics.js';
 import { Ads } from './ads.js';
-import { itemVisual } from './entities.js';
 
 async function boot() {
   const ui = new UI();
@@ -26,31 +25,29 @@ async function boot() {
   const canvas = document.getElementById('game-canvas');
   const game = new Game(canvas, {
     onScoreChange: (score) => ui.setHudScore(score),
-    onDrop: () => {
-      audio.playDrop();
+    onFlip: (toRed) => {
+      audio.playFlip(toRed);
+      Vibe.light();
     },
-    onMerge: (chainCount, tier) => {
-      audio.playMerge(tier, chainCount);
-      if (chainCount >= 3) Vibe.medium();
+    onGem: (comboCount) => {
+      audio.playGem(comboCount);
+      if (comboCount >= 3) Vibe.medium();
     },
+    onNearMiss: () => audio.playNearMiss(),
     onNewBestCrossed: () => {
       audio.playNewBest();
       Vibe.success();
       ui.setHudScoreGold(true);
     },
-    onFreezeChange: (active) => {
-      ui.setFreezeActive(active);
-      if (active) audio.playFreezeGain();
+    onShieldChange: (active) => {
+      ui.setShieldActive(active);
+      if (active) audio.playShieldGain();
     },
-    onFreezeSave: () => {
-      audio.playFreezeSave();
+    onShieldBreak: () => {
+      audio.playShieldBreak();
       Vibe.medium();
     },
-    onQueueChange: (nextItem) => {
-      const visual = itemVisual(nextItem);
-      ui.setNextPreview(visual.color, visual.label);
-    },
-    onTutorialHint: (show) => ui.showGestureHints(show),
+    onTutorialHint: (show) => ui.showGestureHint(show),
     onGameOver: (score) => {
       audio.playGameOver();
       Vibe.heavy();
@@ -104,7 +101,7 @@ async function boot() {
     }
   }
 
-  /** Offers one "watch an ad to clear space" chance before the run is actually over. */
+  /** Offers one "watch an ad to keep going" chance before the run is actually over. */
   function offerContinue(score) {
     let secondsLeft = CONFIG.ADS.CONTINUE_OFFER_SECONDS;
     ui.setContinueTimer(secondsLeft);
@@ -144,7 +141,7 @@ async function boot() {
     if (showTutorial) await Storage.markTutorialSeen();
     continuesUsedThisRun = 0;
     ui.setHudScoreGold(false);
-    ui.setFreezeActive(false);
+    ui.setShieldActive(false);
     ui.pauseBtn.classList.remove('hidden');
     ui.showScreen('game');
     ui.showPauseOverlay(false);
@@ -196,21 +193,6 @@ async function boot() {
     ui.setMuteIcon(next);
     if (next) audio.unlock(); // re-arm the AudioContext in case it was never unlocked yet
   });
-
-  // Tilt buttons: hold to tilt the jar, release to spring back level. Deliberately separate
-  // from the drop gesture (drag-to-position-then-release on the canvas itself).
-  const bindTiltButton = (el, side) => {
-    const setHeld = (held) => game.setTiltHeld(side, held);
-    el.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      setHeld(true);
-    });
-    el.addEventListener('pointerup', () => setHeld(false));
-    el.addEventListener('pointerleave', () => setHeld(false));
-    el.addEventListener('pointercancel', () => setHeld(false));
-  };
-  bindTiltButton(ui.tiltLeftBtn, 'left');
-  bindTiltButton(ui.tiltRightBtn, 'right');
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && game.isPlaying()) {

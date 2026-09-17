@@ -40,20 +40,21 @@ export class AudioManager {
     this.enabled = enabled;
   }
 
-  /** Tiny tick on every ball drop - the core input needs instant audio feedback. */
-  playDrop() {
+  /** Polarity flip - a quick two-tone blip, pitched by which charge it's flipping *to*. */
+  playFlip(toRed) {
     if (!this.enabled) return;
     const ctx = this._ensureContext();
     const now = ctx.currentTime;
 
     const osc = ctx.createOscillator();
     osc.type = 'square';
-    osc.frequency.setValueAtTime(360, now);
-    osc.frequency.exponentialRampToValueAtTime(260, now + 0.05);
+    const base = toRed ? 340 : 480;
+    osc.frequency.setValueAtTime(base, now);
+    osc.frequency.exponentialRampToValueAtTime(base * 1.35, now + 0.05);
 
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.09, now + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.11, now + 0.006);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
 
     osc.connect(gain).connect(ctx.destination);
@@ -61,28 +62,49 @@ export class AudioManager {
     osc.stop(now + 0.08);
   }
 
-  /** Two orbs merged. Pitch rises with tier and with the current chain length. */
-  playMerge(tier = 0, chainCount = 1) {
+  /** Gem grabbed. Pitch rises with the combo streak. */
+  playGem(comboCount = 1) {
     if (!this.enabled) return;
     const ctx = this._ensureContext();
     const now = ctx.currentTime;
 
-    const baseFreq = 300 + tier * 40;
-    const freq = Math.min(baseFreq + (chainCount - 1) * 70, 1600);
+    const baseFreq = 420;
+    const freq = Math.min(baseFreq + (comboCount - 1) * 60, 1400);
 
     const osc = ctx.createOscillator();
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(freq, now);
-    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 0.09);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 0.08);
 
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0.0001, now);
     gain.gain.exponentialRampToValueAtTime(0.26, now + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
 
     osc.connect(gain).connect(ctx.destination);
     osc.start(now);
-    osc.stop(now + 0.16);
+    osc.stop(now + 0.15);
+  }
+
+  /** A close, skillful pass along a wall (near-miss) - a subtle whoosh, not as loud as a gem. */
+  playNearMiss() {
+    if (!this.enabled) return;
+    const ctx = this._ensureContext();
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(900, now);
+    osc.frequency.exponentialRampToValueAtTime(500, now + 0.1);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.09, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.13);
   }
 
   /** Short triumphant ascending chime the moment the player passes their best score mid-run. */
@@ -108,8 +130,8 @@ export class AudioManager {
     });
   }
 
-  /** Freeze charge gained - a short two-note shimmer, distinct from the merge chime. */
-  playFreezeGain() {
+  /** Shield charge gained - a short two-note shimmer, distinct from the gem chime. */
+  playShieldGain() {
     if (!this.enabled) return;
     const ctx = this._ensureContext();
     const now = ctx.currentTime;
@@ -131,8 +153,8 @@ export class AudioManager {
     });
   }
 
-  /** Freeze charge spent to save an overflow - a short metallic clang. */
-  playFreezeSave() {
+  /** Shield absorbs a wrong-polarity hit - a short metallic clang instead of the full crash tone. */
+  playShieldBreak() {
     if (!this.enabled) return;
     const ctx = this._ensureContext();
     const now = ctx.currentTime;
@@ -152,7 +174,7 @@ export class AudioManager {
     osc.stop(now + 0.2);
   }
 
-  /** Short descending tone when the jar overflows. */
+  /** Short descending tone on game over (wrong-polarity crash). */
   playGameOver() {
     if (!this.enabled) return;
     const ctx = this._ensureContext();

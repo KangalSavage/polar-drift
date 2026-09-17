@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Tilt Merge</string>
+        <string>Polar Drift</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -25,7 +25,7 @@
 	<key>GADIsAdManagerApp</key>
 	<true/>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>This identifier will be used to show you relevant ads and keep Tilt Merge free.</string>
+	<string>This identifier will be used to show you relevant ads and keep Polar Drift free.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

@@ -7,12 +7,12 @@
 // localStorage under the hood, so this same code works in the browser too.
 import { Preferences } from '@capacitor/preferences';
 
-const BEST_SCORE_KEY = 'tiltmerge_best_score';
-const TUTORIAL_SEEN_KEY = 'tiltmerge_tutorial_seen';
-const THEME_INDEX_KEY = 'tiltmerge_theme_index';
-const SOUND_ENABLED_KEY = 'tiltmerge_sound_enabled';
-const COINS_KEY = 'tiltmerge_coins';
-const PURCHASED_THEMES_KEY = 'tiltmerge_purchased_themes';
+const BEST_SCORE_KEY = 'polardrift_best_score';
+const TUTORIAL_SEEN_KEY = 'polardrift_tutorial_seen';
+const THEME_INDEX_KEY = 'polardrift_theme_index';
+const SOUND_ENABLED_KEY = 'polardrift_sound_enabled';
+const COINS_KEY = 'polardrift_coins';
+const PURCHASED_THEMES_KEY = 'polardrift_purchased_themes';
 
 let cachedBestScore = 0;
 let cachedHasSeenTutorial = false;

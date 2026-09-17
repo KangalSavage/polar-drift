@@ -1,16 +1,16 @@
 {
-  "appId": "com.sparkform.tiltmerge",
-  "appName": "Tilt Merge",
+  "appId": "com.sparkform.polardrift",
+  "appName": "Polar Drift",
   "webDir": "www",
-  "backgroundColor": "#0a0f1e",
+  "backgroundColor": "#05060f",
   "server": {
     "androidScheme": "https"
   },
   "android": {
-    "backgroundColor": "#0a0f1e"
+    "backgroundColor": "#05060f"
   },
   "ios": {
-    "backgroundColor": "#0a0f1e",
+    "backgroundColor": "#05060f",
     "contentInset": "always"
   }
 }

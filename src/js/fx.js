@@ -101,18 +101,6 @@ export class FloatingTexts {
   }
 }
 
-/** Mixes a #rrggbb color toward white (amt > 0) or black (amt < 0) by |amt| (0..1). Used to fake a glossy sphere gradient from one base hex per tier. */
-export function shadeColor(hex, amt) {
-  const n = parseInt(hex.slice(1), 16);
-  const r = (n >> 16) & 255;
-  const g = (n >> 8) & 255;
-  const b = n & 255;
-  const t = Math.max(-1, Math.min(1, amt));
-  const target = t >= 0 ? 255 : 0;
-  const mix = (c) => Math.round(c + (target - c) * Math.abs(t));
-  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
-}
-
 export class ScreenShake {
   constructor() {
     this.trauma = 0;
@@ -135,4 +123,16 @@ export class ScreenShake {
       y: (Math.random() * 2 - 1) * maxOffsetPx * s,
     };
   }
+}
+
+/** Mixes a #rrggbb color toward white (amt > 0) or black (amt < 0) by |amt| (0..1). */
+export function shadeColor(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  const t = Math.max(-1, Math.min(1, amt));
+  const target = t >= 0 ? 255 : 0;
+  const mix = (c) => Math.round(c + (target - c) * Math.abs(t));
+  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
 }

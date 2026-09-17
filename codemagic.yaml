@@ -1,23 +1,21 @@
 workflows:
   ios-workflow:
-    name: Tilt Merge - iOS
+    name: Polar Drift - iOS
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
-      # Must match the reference name given to the App Store Connect API key
-      # integration in Codemagic: Team settings -> Integrations -> App Store Connect.
-      # TODO: confirm which integration name covers this app - reused the same one
-      # Orbit Dash uses ("Echo Trail: Dodge"), but verify in the Codemagic dashboard
-      # before the first run; a wrong name fails at the signing-files step.
+      # Confirmed working (Team-wide Admin key, not per-app) - see Users and Access ->
+      # Integrations -> App Store Connect API in App Store Connect.
       app_store_connect: "Echo Trail: Dodge"
     environment:
       groups:
-        # Must contain CERTIFICATE_PRIVATE_KEY (secret) - see Codemagic Team/App
-        # Environment variables. Used to encrypt a freshly auto-generated
-        # distribution certificate's private key; not an Apple credential itself.
+        # Must contain CERTIFICATE_PRIVATE_KEY (secret) - reuse the SAME value already
+        # saved for the Tilt Merge app in this Codemagic project, not a freshly generated
+        # one. Apple caps active Distribution certificates per account (3), so every new
+        # game from here on should reuse this same certificate rather than minting another.
         - code_signing
       vars:
-        BUNDLE_ID: "com.sparkform.tiltmerge"
+        BUNDLE_ID: "com.sparkform.polardrift"
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
       node: latest

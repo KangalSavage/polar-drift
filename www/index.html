@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0a0f1e" />
-  <title>Tilt Merge</title>
+  <meta name="theme-color" content="#05060f" />
+  <title>Polar Drift</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -33,13 +33,13 @@
 
       <div class="top-group">
         <div class="logo-wrap">
-          <div class="logo-jar">
-            <span class="logo-ball"></span>
+          <div class="logo-orb">
+            <span class="logo-orb-core"></span>
           </div>
-          <h1 class="title">TILT<br />MERGE</h1>
+          <h1 class="title">POLAR<br />DRIFT</h1>
         </div>
-        <span class="hyper-badge">HOLD · DRAG · MERGE</span>
-        <p class="tagline">Drag to aim, release to drop&nbsp;&nbsp;·&nbsp;&nbsp;Hold a side to tilt the jar</p>
+        <span class="hyper-badge">TAP TO FLIP</span>
+        <p class="tagline">Same charge repels you safely&nbsp;&nbsp;·&nbsp;&nbsp;Opposite charge pulls you in</p>
       </div>
 
       <div class="bottom-group">
@@ -52,28 +52,18 @@
     <section id="game-screen" class="screen">
       <div class="hud">
         <div class="hud-score">
-          <span id="hud-freeze" class="hud-freeze hidden">❄</span>
+          <span id="hud-shield" class="hud-shield hidden">🛡</span>
           <span id="hud-score" class="score-value">0</span>
-        </div>
-        <div class="next-badge">
-          <span class="next-badge-label">NEXT</span>
-          <span id="next-preview" class="next-preview"><span id="next-preview-label"></span></span>
         </div>
         <button id="pause-btn" class="icon-btn" aria-label="Pause">
           <span class="pause-icon"></span>
         </button>
       </div>
 
-      <div id="gesture-hints" class="gesture-hints hidden" aria-hidden="true">
-        <div class="gesture-hint">
-          <span class="gesture-hint-arrow">↕</span>
-          <span class="gesture-hint-label">DRAG · RELEASE TO DROP</span>
-        </div>
-      </div>
-
-      <div class="tilt-controls">
-        <button id="tilt-left-btn" class="tilt-btn" aria-label="Tilt jar left">◀</button>
-        <button id="tilt-right-btn" class="tilt-btn" aria-label="Tilt jar right">▶</button>
+      <div id="gesture-hint" class="gesture-hint hidden" aria-hidden="true">
+        <span class="gesture-hint-ring"></span>
+        <span class="gesture-hint-ring gesture-hint-ring-delay"></span>
+        <span class="gesture-hint-label">TAP ANYWHERE TO FLIP CHARGE</span>
       </div>
 
       <!-- PAUSE OVERLAY -->
@@ -85,12 +75,12 @@
         </div>
       </div>
 
-      <!-- CONTINUE (watch-ad-to-clear-space) OVERLAY -->
+      <!-- CONTINUE (watch-ad-to-revive) OVERLAY -->
       <div id="continue-overlay" class="overlay hidden">
         <div class="overlay-content">
-          <h2 class="gameover-title">JAR FULL</h2>
+          <h2 class="gameover-title">SHORTED OUT</h2>
           <div id="continue-timer" class="continue-timer">5</div>
-          <button id="continue-btn" class="btn btn-primary">▶ WATCH AD TO CLEAR SPACE</button>
+          <button id="continue-btn" class="btn btn-primary">▶ WATCH AD TO CONTINUE</button>
           <button id="continue-skip-btn" class="btn btn-secondary">NO THANKS</button>
         </div>
       </div>
@@ -99,7 +89,7 @@
     <!-- GAME OVER -->
     <section id="gameover-screen" class="screen">
       <div class="menu-content">
-        <h1 class="title gameover-title">OVERFLOW</h1>
+        <h1 class="title gameover-title">SHORTED OUT</h1>
         <div id="new-best-badge" class="new-best-badge hidden">NEW BEST!</div>
 
         <div class="score-summary">
