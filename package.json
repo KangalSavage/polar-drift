@@ -1,0 +1,27 @@
+{
+  "name": "tilt-merge",
+  "version": "0.1.0",
+  "description": "Tilt Merge - physics-based merge puzzle. Tilt the jar, drop matching orbs, chain merges before it overflows.",
+  "private": true,
+  "scripts": {
+    "dev": "esbuild src/js/main.js --bundle --outfile=www/js/bundle.js --servedir=www --watch=forever",
+    "build": "esbuild src/js/main.js --bundle --outfile=www/js/bundle.js --minify",
+    "cap:sync": "npx cap sync",
+    "cap:add:ios": "npx cap add ios",
+    "cap:add:android": "npx cap add android",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/haptics": "^6.0.3",
+    "@capacitor/preferences": "^6.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/ios": "^6.2.0",
+    "esbuild": "^0.24.0"
+  }
+}

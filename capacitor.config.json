@@ -1,0 +1,16 @@
+{
+  "appId": "com.sparkform.tiltmerge",
+  "appName": "Tilt Merge",
+  "webDir": "www",
+  "backgroundColor": "#0a0f1e",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0a0f1e"
+  },
+  "ios": {
+    "backgroundColor": "#0a0f1e",
+    "contentInset": "always"
+  }
+}

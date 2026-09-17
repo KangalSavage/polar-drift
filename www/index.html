@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0f1e" />
+  <title>Tilt Merge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- MAIN MENU -->
+    <section id="menu-screen" class="screen active">
+      <div class="badge-stack">
+        <div class="best-badge">
+          <span class="best-badge-icon">★</span>
+          <span id="menu-best-score">0</span>
+        </div>
+        <div class="best-badge coin-badge">
+          <span class="best-badge-icon">🪙</span>
+          <span id="menu-coins">0</span>
+        </div>
+      </div>
+
+      <button id="mute-btn" class="mute-btn" aria-label="Toggle sound">
+        <span id="mute-icon">🔊</span>
+      </button>
+
+      <div class="top-group">
+        <div class="logo-wrap">
+          <div class="logo-jar">
+            <span class="logo-ball"></span>
+          </div>
+          <h1 class="title">TILT<br />MERGE</h1>
+        </div>
+        <span class="hyper-badge">HOLD · DRAG · MERGE</span>
+        <p class="tagline">Drag to aim, release to drop&nbsp;&nbsp;·&nbsp;&nbsp;Hold a side to tilt the jar</p>
+      </div>
+
+      <div class="bottom-group">
+        <div id="theme-row" class="theme-row"></div>
+        <button id="start-btn" class="btn btn-cta">PLAY</button>
+      </div>
+    </section>
+
+    <!-- GAME SCREEN -->
+    <section id="game-screen" class="screen">
+      <div class="hud">
+        <div class="hud-score">
+          <span id="hud-freeze" class="hud-freeze hidden">❄</span>
+          <span id="hud-score" class="score-value">0</span>
+        </div>
+        <div class="next-badge">
+          <span class="next-badge-label">NEXT</span>
+          <span id="next-preview" class="next-preview"><span id="next-preview-label"></span></span>
+        </div>
+        <button id="pause-btn" class="icon-btn" aria-label="Pause">
+          <span class="pause-icon"></span>
+        </button>
+      </div>
+
+      <div id="gesture-hints" class="gesture-hints hidden" aria-hidden="true">
+        <div class="gesture-hint">
+          <span class="gesture-hint-arrow">↕</span>
+          <span class="gesture-hint-label">DRAG · RELEASE TO DROP</span>
+        </div>
+      </div>
+
+      <div class="tilt-controls">
+        <button id="tilt-left-btn" class="tilt-btn" aria-label="Tilt jar left">◀</button>
+        <button id="tilt-right-btn" class="tilt-btn" aria-label="Tilt jar right">▶</button>
+      </div>
+
+      <!-- PAUSE OVERLAY -->
+      <div id="pause-overlay" class="overlay hidden">
+        <div class="overlay-content">
+          <h2>PAUSED</h2>
+          <button id="resume-btn" class="btn btn-primary">RESUME</button>
+          <button id="pause-menu-btn" class="btn btn-secondary">MAIN MENU</button>
+        </div>
+      </div>
+
+      <!-- CONTINUE (watch-ad-to-clear-space) OVERLAY -->
+      <div id="continue-overlay" class="overlay hidden">
+        <div class="overlay-content">
+          <h2 class="gameover-title">JAR FULL</h2>
+          <div id="continue-timer" class="continue-timer">5</div>
+          <button id="continue-btn" class="btn btn-primary">▶ WATCH AD TO CLEAR SPACE</button>
+          <button id="continue-skip-btn" class="btn btn-secondary">NO THANKS</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAME OVER -->
+    <section id="gameover-screen" class="screen">
+      <div class="menu-content">
+        <h1 class="title gameover-title">OVERFLOW</h1>
+        <div id="new-best-badge" class="new-best-badge hidden">NEW BEST!</div>
+
+        <div class="score-summary">
+          <div class="score-row">
+            <span class="label">SCORE</span>
+            <span id="final-score" class="value">0</span>
+          </div>
+          <div class="score-row">
+            <span class="label">BEST</span>
+            <span id="final-best-score" class="value">0</span>
+          </div>
+        </div>
+
+        <div id="coins-earned-row" class="coins-earned-row hidden">
+          <span class="best-badge-icon">🪙</span>
+          <span>+<span id="coins-earned">0</span> COINS</span>
+        </div>
+
+        <button id="play-again-btn" class="btn btn-primary">PLAY AGAIN</button>
+        <button id="gameover-menu-btn" class="btn btn-secondary">MAIN MENU</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="js/bundle.js"></script>
+</body>
+</html>
