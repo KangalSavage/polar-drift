@@ -11,6 +11,7 @@ export class Obstacle {
     this.scored = false; // has the pass/near-miss bonus already been evaluated for this one?
     this.dangerHandled = false; // has a wrong-polarity contact with this one already been resolved (death or shield)?
     this.alive = true;
+    this.isTutorialGate = false; // set by spawnObstacles() for spawn #0 - see Game._update's forced-teaching pause
   }
 }
 
@@ -60,13 +61,18 @@ export function spawnObstacles(spawnIndex, spawnY, shaftWidth) {
   const isTutorial = spawnIndex === 0;
 
   const side = isTutorial ? 'left' : Math.random() < 0.5 ? 'left' : 'right';
-  const polarity = isTutorial ? 'red' : Math.random() < 0.5 ? 'red' : 'blue';
+  // The tutorial obstacle is always the *opposite* of the ball's fixed starting charge
+  // ('red', see Game.startNewRun) - it has to force a flip, not let the player coast through
+  // by doing nothing. Combined with Game's forced pause on this specific obstacle, this is
+  // where a first-time player learns the rule by being made to act on it, not just read it.
+  const polarity = isTutorial ? 'blue' : Math.random() < 0.5 ? 'red' : 'blue';
   const depthFrac = isTutorial
     ? CONFIG.OBSTACLE_DEPTH_MIN_FRACTION
     : CONFIG.OBSTACLE_DEPTH_MIN_FRACTION +
       Math.random() * (CONFIG.OBSTACLE_DEPTH_MAX_FRACTION - CONFIG.OBSTACLE_DEPTH_MIN_FRACTION);
 
   const obstacles = [new Obstacle(side, polarity, depthFrac * shaftWidth, spawnY)];
+  if (isTutorial) obstacles[0].isTutorialGate = true;
 
   const wantsDoubleSided =
     !isTutorial &&

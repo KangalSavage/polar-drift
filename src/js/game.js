@@ -14,8 +14,8 @@ export class Game {
    * @param {HTMLCanvasElement} canvas
    * @param {object} callbacks
    *   onScoreChange(score), onFlip(toRed), onGem(comboCount), onNearMiss(),
-   *   onNewBestCrossed(), onShieldChange(active), onShieldBreak(), onGameOver(score),
-   *   onTutorialHint(show)
+   *   onNewBestCrossed(), onShieldChange(active), onShieldBreak(),
+   *   onGameOver(score, nearMissCount), onTutorialHint(show)
    */
   constructor(canvas, callbacks = {}) {
     this.canvas = canvas;
@@ -43,6 +43,8 @@ export class Game {
     this.spawnTimer = 0;
     this.spawnIndex = 0;
     this.ambientSpawnTimer = 0;
+    this.tutorialGateActive = false;
+    this.nearMissCount = 0;
 
     this.hasShield = false;
     this.comboCount = 0;
@@ -133,6 +135,7 @@ export class Game {
     this.lastGemAtMs = -Infinity;
     this.rawScore = 0;
     this.score = 0;
+    this.nearMissCount = 0;
     this.bestScoreAtStart = bestScore;
     this.crossedBest = false;
     this.elapsedMs = 0;
@@ -143,6 +146,10 @@ export class Game {
     this.floatingTexts.clear();
     this.shake.trauma = 0;
     this.state = STATE.PLAYING;
+    // Only the player's very first-ever run forces a full stop until they flip correctly -
+    // returning players already know the rule, so their tutorial obstacle just plays out
+    // like a (generous) normal one instead of blocking them every single run.
+    this.tutorialGateActive = showTutorial;
 
     this._emitScore();
     if (this.callbacks.onShieldChange) this.callbacks.onShieldChange(false);
@@ -218,7 +225,19 @@ export class Game {
     this.elapsedMs += dt * 1000;
     const { fallSpeed, spawnIntervalMs } = getDifficulty(this.elapsedMs);
 
-    for (const o of this.obstacles) o.y -= fallSpeed * dt;
+    for (const o of this.obstacles) {
+      if (o.isTutorialGate && this.tutorialGateActive) {
+        const holdY = this.ballScreenY + o.thickness * 2;
+        if (o.y <= holdY) {
+          if (o.polarity === this.ballPolarity) {
+            this.tutorialGateActive = false; // matched - release it and everything from now on
+          } else {
+            continue; // hold position right where it's clearly visible, waiting for the flip
+          }
+        }
+      }
+      o.y -= fallSpeed * dt;
+    }
     for (const p of this.pickups) p.y -= fallSpeed * dt;
 
     this.spawnTimer -= dt * 1000;
@@ -320,6 +339,7 @@ export class Game {
       const edgeX = o.side === 'left' ? this.shaftLeft + o.depthPx : this.shaftRight - o.depthPx;
       const margin = o.side === 'left' ? this.ballX - CONFIG.BALL_RADIUS - edgeX : edgeX - (this.ballX + CONFIG.BALL_RADIUS);
       if (margin >= 0 && margin < CONFIG.NEAR_MISS_MARGIN_PX) {
+        this.nearMissCount += 1;
         this.rawScore += CONFIG.NEAR_MISS_BONUS;
         this.particles.spawnBurst(this.ballX, this.ballScreenY, this.trailAccent, 5);
         if (this.callbacks.onNearMiss) this.callbacks.onNearMiss();
@@ -420,7 +440,7 @@ export class Game {
     this.gameOverFlashMs = 280;
     const dangerColor = this.ballPolarity === 'red' ? CONFIG.RED : CONFIG.BLUE;
     this.particles.spawnBurst(this.ballX, this.ballScreenY, dangerColor, 28);
-    if (this.callbacks.onGameOver) this.callbacks.onGameOver(this.score);
+    if (this.callbacks.onGameOver) this.callbacks.onGameOver(this.score, this.nearMissCount);
   }
 
   _emitScore() {

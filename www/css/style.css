@@ -439,6 +439,36 @@ html, body {
   font-size: 0.9rem;
 }
 
+.near-miss-row {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--blue);
+  text-shadow: 0 0 8px rgba(45, 155, 255, 0.5);
+}
+
+.near-miss-row span { font-size: 1rem; }
+
+.double-coins-btn {
+  border-color: var(--gold);
+  background: linear-gradient(160deg, rgba(255, 210, 61, 0.2), rgba(255, 210, 61, 0.05));
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(255, 210, 61, 0.6);
+  box-shadow: 0 0 14px rgba(255, 210, 61, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  min-width: 0;
+  padding: 12px 28px;
+  font-size: 0.85rem;
+}
+
+.double-coins-claimed {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(255, 210, 61, 0.6);
+}
+
 .new-best-badge {
   color: var(--gold);
   letter-spacing: 0.2em;

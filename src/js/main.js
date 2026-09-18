@@ -48,13 +48,13 @@ async function boot() {
       Vibe.medium();
     },
     onTutorialHint: (show) => ui.showGestureHint(show),
-    onGameOver: (score) => {
+    onGameOver: (score, nearMissCount) => {
       audio.playGameOver();
       Vibe.heavy();
       if (continuesUsedThisRun < CONFIG.ADS.MAX_CONTINUES_PER_RUN && Ads.isRewardedReady()) {
-        offerContinue(score);
+        offerContinue(score, nearMissCount);
       } else {
-        finalizeGameOver(score);
+        finalizeGameOver(score, nearMissCount);
       }
     },
   });
@@ -84,14 +84,36 @@ async function boot() {
   }
   refreshThemeRow();
 
-  async function finalizeGameOver(score) {
+  async function finalizeGameOver(score, nearMissCount) {
     const isNewBest = await Storage.setBestScoreIfHigher(score);
     const coinsEarned = Math.max(1, Math.floor(score / CONFIG.COIN_SCORE_DIVISOR));
     await Storage.addCoins(coinsEarned);
     ui.setMenuBestScore(Storage.getBestScore());
     ui.setMenuCoins(Storage.getCoins());
-    ui.showGameOver({ score, best: Storage.getBestScore(), isNewBest, coinsEarned });
+    ui.showGameOver({ score, best: Storage.getBestScore(), isNewBest, coinsEarned, nearMissCount });
     refreshThemeRow(); // the coin balance just changed - a theme may now be affordable
+
+    // A second, independent monetization moment from the continue offer above - this one
+    // fires after the run is already fully settled, so it's a pure bonus ask, never a
+    // do-or-die decision like the continue prompt.
+    let coinsDoubled = false;
+    const offerDoubleCoins = Ads.isRewardedReady();
+    ui.showDoubleCoinsButton(offerDoubleCoins, coinsEarned);
+    if (offerDoubleCoins) {
+      ui.doubleCoinsBtn.onclick = async () => {
+        if (coinsDoubled) return;
+        const earned = await Ads.showRewarded();
+        audio.reset(); // the native ad view stole the audio session - rebuild on the next tap
+        if (earned) {
+          coinsDoubled = true;
+          await Storage.addCoins(coinsEarned);
+          ui.setMenuCoins(Storage.getCoins());
+          ui.showDoubleCoinsButton(false);
+          ui.showDoubleCoinsClaimed(coinsEarned);
+          refreshThemeRow();
+        }
+      };
+    }
 
     runsSinceInterstitial += 1;
     if (runsSinceInterstitial >= CONFIG.ADS.INTERSTITIAL_EVERY_N_GAMEOVERS) {
@@ -102,7 +124,7 @@ async function boot() {
   }
 
   /** Offers one "watch an ad to keep going" chance before the run is actually over. */
-  function offerContinue(score) {
+  function offerContinue(score, nearMissCount) {
     let secondsLeft = CONFIG.ADS.CONTINUE_OFFER_SECONDS;
     ui.setContinueTimer(secondsLeft);
     ui.showContinueOverlay(true);
@@ -111,7 +133,7 @@ async function boot() {
     continueTimerHandle = setInterval(() => {
       secondsLeft -= 1;
       ui.setContinueTimer(secondsLeft);
-      if (secondsLeft <= 0) declineContinue(score);
+      if (secondsLeft <= 0) declineContinue(score, nearMissCount);
     }, 1000);
 
     ui.continueBtn.onclick = async () => {
@@ -124,16 +146,16 @@ async function boot() {
         game.continueRun();
         ui.pauseBtn.classList.remove('hidden');
       } else {
-        finalizeGameOver(score);
+        finalizeGameOver(score, nearMissCount);
       }
     };
-    ui.continueSkipBtn.onclick = () => declineContinue(score);
+    ui.continueSkipBtn.onclick = () => declineContinue(score, nearMissCount);
   }
 
-  function declineContinue(score) {
+  function declineContinue(score, nearMissCount) {
     clearInterval(continueTimerHandle);
     ui.showContinueOverlay(false);
-    finalizeGameOver(score);
+    finalizeGameOver(score, nearMissCount);
   }
 
   async function beginRun() {

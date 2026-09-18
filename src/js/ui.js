@@ -22,6 +22,11 @@ export class UI {
     this.finalBestScoreEl = document.getElementById('final-best-score');
     this.newBestBadgeEl = document.getElementById('new-best-badge');
     this.gestureHintEl = document.getElementById('gesture-hint');
+    this.nearMissRowEl = document.getElementById('near-miss-row');
+    this.nearMissCountEl = document.getElementById('near-miss-count');
+    this.doubleCoinsBtn = document.getElementById('double-coins-btn');
+    this.doubleCoinsAmountEl = document.getElementById('double-coins-amount');
+    this.doubleCoinsClaimedEl = document.getElementById('double-coins-claimed');
 
     this.themeRowEl = document.getElementById('theme-row');
 
@@ -121,12 +126,26 @@ export class UI {
     this.continueTimerEl.textContent = Math.max(0, seconds);
   }
 
-  showGameOver({ score, best, isNewBest, coinsEarned }) {
+  showGameOver({ score, best, isNewBest, coinsEarned, nearMissCount }) {
     this.finalScoreEl.textContent = score;
     this.finalBestScoreEl.textContent = best;
     this.newBestBadgeEl.classList.toggle('hidden', !isNewBest);
     this.coinsEarnedEl.textContent = coinsEarned;
     this.coinsEarnedRowEl.classList.toggle('hidden', coinsEarned <= 0);
+    this.nearMissCountEl.textContent = nearMissCount;
+    this.nearMissRowEl.classList.toggle('hidden', !nearMissCount);
+    this.doubleCoinsClaimedEl.classList.add('hidden');
     this.showScreen('gameover');
+  }
+
+  /** The post-run "watch an ad to double what you just earned" offer - hidden if no ad is ready. */
+  showDoubleCoinsButton(show, coinsEarned) {
+    this.doubleCoinsAmountEl.textContent = coinsEarned;
+    this.doubleCoinsBtn.classList.toggle('hidden', !show);
+  }
+
+  showDoubleCoinsClaimed(coinsEarned) {
+    this.doubleCoinsClaimedEl.textContent = `+${coinsEarned} 🪙`;
+    this.doubleCoinsClaimedEl.classList.remove('hidden');
   }
 }
