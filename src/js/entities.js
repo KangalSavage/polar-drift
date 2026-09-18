@@ -2,12 +2,12 @@ import { CONFIG } from './config.js';
 
 /** A colored block jutting in from one shaft wall. Scrolls upward (y decreases) toward the ball. */
 export class Obstacle {
-  constructor(side, polarity, depthPx, y) {
+  constructor(side, polarity, depthPx, y, thickness = CONFIG.OBSTACLE_THICKNESS_PX) {
     this.side = side; // 'left' | 'right'
     this.polarity = polarity; // 'red' | 'blue'
     this.depthPx = depthPx; // how far it juts into the shaft from its wall
     this.y = y;
-    this.thickness = CONFIG.OBSTACLE_THICKNESS_PX;
+    this.thickness = thickness;
     this.scored = false; // has the pass/near-miss bonus already been evaluated for this one?
     this.dangerHandled = false; // has a wrong-polarity contact with this one already been resolved (death or shield)?
     this.alive = true;
@@ -38,10 +38,10 @@ export function comboColor(count) {
  * Smooth, continuous difficulty curve. First DIFFICULTY_GRACE_MS stays flat (learning
  * window), then eases toward the harder ceiling via exponential decay - no sudden jumps.
  */
-export function getDifficulty(elapsedMs) {
+export function getDifficulty(elapsedMs, scale = 1) {
   const t = Math.max(0, elapsedMs - CONFIG.DIFFICULTY_GRACE_MS);
   const progress = 1 - Math.exp(-t / CONFIG.FALL_SPEED_RAMP_TAU_MS);
-  const fallSpeed = CONFIG.FALL_SPEED_BASE + (CONFIG.FALL_SPEED_MAX - CONFIG.FALL_SPEED_BASE) * progress;
+  const fallSpeed = (CONFIG.FALL_SPEED_BASE + (CONFIG.FALL_SPEED_MAX - CONFIG.FALL_SPEED_BASE) * progress) * scale;
   const spawnIntervalMs =
     CONFIG.SPAWN_INTERVAL_BASE_MS - (CONFIG.SPAWN_INTERVAL_BASE_MS - CONFIG.SPAWN_INTERVAL_MIN_MS) * progress;
   return { fallSpeed, spawnIntervalMs, progress };
@@ -56,8 +56,9 @@ export function getDifficulty(elapsedMs) {
  * @param {number} spawnIndex 0 for the very first, fixed teaching spawn
  * @param {number} spawnY world/screen Y the spawn appears at (below the visible area)
  * @param {number} shaftWidth current shaft width in px, for converting depth fractions to px
+ * @param {number} thicknessPx device-scaled obstacle thickness (see Game._resize)
  */
-export function spawnObstacles(spawnIndex, spawnY, shaftWidth) {
+export function spawnObstacles(spawnIndex, spawnY, shaftWidth, thicknessPx) {
   const isTutorial = spawnIndex === 0;
 
   const side = isTutorial ? 'left' : Math.random() < 0.5 ? 'left' : 'right';
@@ -71,7 +72,7 @@ export function spawnObstacles(spawnIndex, spawnY, shaftWidth) {
     : CONFIG.OBSTACLE_DEPTH_MIN_FRACTION +
       Math.random() * (CONFIG.OBSTACLE_DEPTH_MAX_FRACTION - CONFIG.OBSTACLE_DEPTH_MIN_FRACTION);
 
-  const obstacles = [new Obstacle(side, polarity, depthFrac * shaftWidth, spawnY)];
+  const obstacles = [new Obstacle(side, polarity, depthFrac * shaftWidth, spawnY, thicknessPx)];
   if (isTutorial) obstacles[0].isTutorialGate = true;
 
   const wantsDoubleSided =
@@ -95,7 +96,7 @@ export function spawnObstacles(spawnIndex, spawnY, shaftWidth) {
       obstacles[0].depthPx *= scale;
       otherDepthFrac *= scale;
     }
-    obstacles.push(new Obstacle(otherSide, otherPolarity, otherDepthFrac * shaftWidth, spawnY));
+    obstacles.push(new Obstacle(otherSide, otherPolarity, otherDepthFrac * shaftWidth, spawnY, thicknessPx));
   }
 
   return obstacles;

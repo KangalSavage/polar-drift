@@ -7,6 +7,12 @@ export const CONFIG = {
   // keeps layout consistent across phone sizes without hardcoding pixels.
   SHAFT_WIDTH_FRACTION: 0.86, // was 0.64 - untested against a real phone screen, left ~18% dead margin on each side
   BALL_SCREEN_Y_FRACTION: 0.32, // how far down the screen the ball's fixed position sits
+  // The height (in CSS px) every fixed vertical distance below (ball radius, obstacle
+  // thickness, magnet/near-miss range, fall speed) was tuned against. Game._resize() derives
+  // a scale factor from the real device's height relative to this, so a short phone (e.g.
+  // iPhone SE) and a tall one (e.g. Pro Max) get the same actual reaction-time feel instead
+  // of the same fixed obstacle-travel time turning into different amounts of warning.
+  REFERENCE_HEIGHT: 850,
   BALL_RADIUS: 15,
   TRAIL_LENGTH: 16, // how many past positions the motion trail remembers
 

@@ -104,6 +104,18 @@ export class Game {
     this.shaftRight = this.shaftLeft + shaftWidth;
     this.ballScreenY = this.height * CONFIG.BALL_SCREEN_Y_FRACTION;
 
+    // Everything vertical below (ball size, obstacle thickness, magnet/near-miss range, fall
+    // speed) was originally tuned as fixed pixel constants against one specific phone. On a
+    // taller screen an obstacle has farther to travel at the same px/s speed, so it arrives
+    // later - more reaction time on a tall phone, less on a short one, for identical
+    // settings. Scaling all of them by screen height keeps the actual *feel* (reaction time,
+    // ball-to-gap proportions) consistent across devices instead of just the screen width.
+    this.scale = Math.max(0.82, Math.min(1.18, this.height / CONFIG.REFERENCE_HEIGHT));
+    this.ballRadius = CONFIG.BALL_RADIUS * this.scale;
+    this.obstacleThickness = CONFIG.OBSTACLE_THICKNESS_PX * this.scale;
+    this.magnetRange = CONFIG.MAGNET_RANGE_PX * this.scale;
+    this.nearMissMargin = CONFIG.NEAR_MISS_MARGIN_PX * this.scale;
+
     if (!this.ballX) this.ballX = (this.shaftLeft + this.shaftRight) / 2;
 
     const bgGrad = this.ctx.createRadialGradient(
@@ -178,7 +190,7 @@ export class Game {
    * danger band so they aren't instantly re-killed by the same obstacle, no bonus score. */
   continueRun() {
     if (this.state !== STATE.GAMEOVER) return;
-    const dangerBand = CONFIG.OBSTACLE_THICKNESS_PX * 1.6;
+    const dangerBand = this.obstacleThickness * 1.6;
     this.obstacles = this.obstacles.filter((o) => Math.abs(o.y - this.ballScreenY) > dangerBand);
     this.ballVX = 0;
     this.ballX = (this.shaftLeft + this.shaftRight) / 2;
@@ -223,7 +235,7 @@ export class Game {
 
   _update(dt) {
     this.elapsedMs += dt * 1000;
-    const { fallSpeed, spawnIntervalMs } = getDifficulty(this.elapsedMs);
+    const { fallSpeed, spawnIntervalMs } = getDifficulty(this.elapsedMs, this.scale);
 
     for (const o of this.obstacles) {
       if (o.isTutorialGate && this.tutorialGateActive) {
@@ -242,9 +254,9 @@ export class Game {
 
     this.spawnTimer -= dt * 1000;
     if (this.spawnTimer <= 0) {
-      const spawnY = this.height + CONFIG.OBSTACLE_THICKNESS_PX;
+      const spawnY = this.height + this.obstacleThickness;
       const shaftWidth = this.shaftRight - this.shaftLeft;
-      const newObstacles = spawnObstacles(this.spawnIndex, spawnY, shaftWidth);
+      const newObstacles = spawnObstacles(this.spawnIndex, spawnY, shaftWidth, this.obstacleThickness);
       this.obstacles.push(...newObstacles);
       if (this.spawnIndex > 0) {
         const pickup = spawnPickup(newObstacles, spawnY, this.shaftLeft, this.shaftRight);
@@ -254,7 +266,7 @@ export class Game {
       this.spawnTimer = spawnIntervalMs * (0.9 + Math.random() * 0.2);
     }
 
-    this.obstacles = this.obstacles.filter((o) => o.y > -CONFIG.OBSTACLE_THICKNESS_PX && o.alive);
+    this.obstacles = this.obstacles.filter((o) => o.y > -this.obstacleThickness && o.alive);
     this.pickups = this.pickups.filter((p) => p.y > -40 && p.alive);
 
     this._updateBallPhysics(dt);
@@ -282,8 +294,8 @@ export class Game {
 
     for (const o of this.obstacles) {
       const dy = Math.abs(o.y - this.ballScreenY);
-      if (dy >= CONFIG.MAGNET_RANGE_PX) continue;
-      const proximity = 1 - dy / CONFIG.MAGNET_RANGE_PX;
+      if (dy >= this.magnetRange) continue;
+      const proximity = 1 - dy / this.magnetRange;
       const edgeX = o.side === 'left' ? this.shaftLeft + o.depthPx : this.shaftRight - o.depthPx;
       const sameCharge = o.polarity === this.ballPolarity;
       const dir = o.side === 'left' ? 1 : -1; // "away from this wall" direction
@@ -294,7 +306,7 @@ export class Game {
       // of cases - this is a safety net for the rare tight/fast case, so it needs to read as
       // a quick glide, not a teleport, when it does kick in.
       if (sameCharge) {
-        const boundary = o.side === 'left' ? edgeX + CONFIG.BALL_RADIUS : edgeX - CONFIG.BALL_RADIUS;
+        const boundary = o.side === 'left' ? edgeX + this.ballRadius : edgeX - this.ballRadius;
         const violating = o.side === 'left' ? this.ballX < boundary : this.ballX > boundary;
         if (violating) {
           this.ballX += (boundary - this.ballX) * Math.min(1, CONFIG.WALL_CORRECTION_RATE * dt);
@@ -307,7 +319,7 @@ export class Game {
     this.ballVX += ax * dt;
     this.ballVX *= Math.pow(CONFIG.HORIZONTAL_DAMPING, dt * 60);
     this.ballX += this.ballVX * dt;
-    this.ballX = Math.max(this.shaftLeft + CONFIG.BALL_RADIUS, Math.min(this.shaftRight - CONFIG.BALL_RADIUS, this.ballX));
+    this.ballX = Math.max(this.shaftLeft + this.ballRadius, Math.min(this.shaftRight - this.ballRadius, this.ballX));
   }
 
   _checkDanger() {
@@ -319,7 +331,7 @@ export class Game {
       if (o.dangerHandled) continue;
       const edgeX = o.side === 'left' ? this.shaftLeft + o.depthPx : this.shaftRight - o.depthPx;
       const overlaps =
-        o.side === 'left' ? this.ballX - CONFIG.BALL_RADIUS < edgeX : this.ballX + CONFIG.BALL_RADIUS > edgeX;
+        o.side === 'left' ? this.ballX - this.ballRadius < edgeX : this.ballX + this.ballRadius > edgeX;
       if (!overlaps) continue;
       if (o.polarity === this.ballPolarity) continue; // same charge can't overlap - it's a wall
 
@@ -337,8 +349,8 @@ export class Game {
       if (o.scored || o.y > this.ballScreenY) continue;
       o.scored = true;
       const edgeX = o.side === 'left' ? this.shaftLeft + o.depthPx : this.shaftRight - o.depthPx;
-      const margin = o.side === 'left' ? this.ballX - CONFIG.BALL_RADIUS - edgeX : edgeX - (this.ballX + CONFIG.BALL_RADIUS);
-      if (margin >= 0 && margin < CONFIG.NEAR_MISS_MARGIN_PX) {
+      const margin = o.side === 'left' ? this.ballX - this.ballRadius - edgeX : edgeX - (this.ballX + this.ballRadius);
+      if (margin >= 0 && margin < this.nearMissMargin) {
         this.nearMissCount += 1;
         this.rawScore += CONFIG.NEAR_MISS_BONUS;
         this.particles.spawnBurst(this.ballX, this.ballScreenY, this.trailAccent, 5);
@@ -452,7 +464,7 @@ export class Game {
   // hands-off preview of the game running behind the menu, same idea as the other games.
 
   _updateAmbient(dt) {
-    const fallSpeed = CONFIG.FALL_SPEED_BASE * 0.8;
+    const fallSpeed = CONFIG.FALL_SPEED_BASE * this.scale * 0.8;
     for (const o of this.obstacles) o.y -= fallSpeed * dt;
     for (const p of this.pickups) p.y -= fallSpeed * dt;
 
@@ -462,13 +474,13 @@ export class Game {
       const side = Math.random() < 0.5 ? 'left' : 'right';
       const polarity = Math.random() < 0.5 ? 'red' : 'blue';
       const depthFrac = CONFIG.OBSTACLE_DEPTH_MIN_FRACTION + Math.random() * 0.15;
-      this.obstacles.push(new Obstacle(side, polarity, depthFrac * shaftWidth, this.height + 100));
+      this.obstacles.push(new Obstacle(side, polarity, depthFrac * shaftWidth, this.height + 100, this.obstacleThickness));
       this.ambientSpawnTimer = 1100 + Math.random() * 400;
     }
-    this.obstacles = this.obstacles.filter((o) => o.y > -CONFIG.OBSTACLE_THICKNESS_PX);
+    this.obstacles = this.obstacles.filter((o) => o.y > -this.obstacleThickness);
 
     // Auto-pilot: match whichever nearby obstacle's polarity keeps the ball safest.
-    const nearest = this.obstacles.find((o) => Math.abs(o.y - this.ballScreenY) < CONFIG.MAGNET_RANGE_PX);
+    const nearest = this.obstacles.find((o) => Math.abs(o.y - this.ballScreenY) < this.magnetRange);
     if (nearest) this.ballPolarity = nearest.polarity;
 
     this._updateBallPhysics(dt); // deliberately no _checkDanger() here - the ambient preview can never "die"
@@ -626,7 +638,7 @@ export class Game {
       const color = t.polarity === 'red' ? CONFIG.RED : CONFIG.BLUE;
       ctx.globalAlpha = age * 0.5;
       ctx.beginPath();
-      ctx.arc(t.x, t.y, CONFIG.BALL_RADIUS * age * 0.75, 0, Math.PI * 2);
+      ctx.arc(t.x, t.y, this.ballRadius * age * 0.75, 0, Math.PI * 2);
       ctx.fillStyle = color;
       ctx.fill();
     }
@@ -636,7 +648,7 @@ export class Game {
   _drawBall(ctx) {
     const color = this.ballPolarity === 'red' ? CONFIG.RED : CONFIG.BLUE;
     const pulse = 1 + Math.sin(this.coreTime * 6) * 0.06;
-    const r = CONFIG.BALL_RADIUS * pulse;
+    const r = this.ballRadius * pulse;
 
     if (this.hasShield) {
       const shieldPulse = 1 + Math.sin(this.coreTime * 6) * 0.12;
