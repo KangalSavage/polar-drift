@@ -261,6 +261,14 @@ export class Game {
     const centerX = (this.shaftLeft + this.shaftRight) / 2;
     let ax = (centerX - this.ballX) * CONFIG.CENTER_SPRING_K;
 
+    for (const p of this.pickups) {
+      if (p.collected) continue;
+      const dy = Math.abs(p.y - this.ballScreenY);
+      if (dy >= CONFIG.PICKUP_ATTRACT_RANGE_PX) continue;
+      const proximity = 1 - dy / CONFIG.PICKUP_ATTRACT_RANGE_PX;
+      ax += (p.x - this.ballX) * CONFIG.PICKUP_ATTRACT_K * proximity;
+    }
+
     for (const o of this.obstacles) {
       const dy = Math.abs(o.y - this.ballScreenY);
       if (dy >= CONFIG.MAGNET_RANGE_PX) continue;

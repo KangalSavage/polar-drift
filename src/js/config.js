@@ -20,6 +20,13 @@ export const CONFIG = {
   WALL_CORRECTION_RATE: 20, // per-second ease rate for the same-charge hard wall boundary - a
   // fast glide into place when it does need to correct, never an instant position snap
 
+  // Pickups have no direct steering competing for them - the ball's horizontal position is
+  // entirely a byproduct of polarity vs. nearby obstacles, so without their own pull, any
+  // pickup sitting off-center while no obstacle happens to be active would be unreachable.
+  // A gentle homing attraction is what actually makes "fly near it to grab it" true.
+  PICKUP_ATTRACT_RANGE_PX: 140,
+  PICKUP_ATTRACT_K: 9,
+
   // Difficulty ramp - flat grace window, then a smooth exponential ease toward the harder
   // ceiling. Same shape as Orbit Dash's curve on purpose: a proven, non-jarring feel.
   DIFFICULTY_GRACE_MS: 3200,
