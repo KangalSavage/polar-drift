@@ -63,14 +63,15 @@ export const CONFIG = {
   // First-run onboarding: spawn #0 is always a fixed, guaranteed-safe teaching layout
   // (single-sided, generous gap) so nobody's first-ever obstacle is an unlucky gamble.
 
-  // Monetization via AdMob (see src/js/ads.js). These are Google's public TEST ad unit
-  // IDs - safe while developing, but MUST be swapped for this app's own real AdMob
-  // app/ad-unit IDs (a fresh registration, separate from Orbit Dash and Tilt Merge) before
-  // any production build, and USE_TEST_ADS flipped to false once verified end to end.
+  // Monetization via AdMob (see src/js/ads.js). Real ad unit IDs, from a dedicated "Polar
+  // Drift" app registered under the same AdMob account as Orbit Dash (publisher id
+  // ca-app-pub-2637666596373570). USE_TEST_ADS is off - real ad units, new ones can take up
+  // to about an hour to start actually serving, and Google's own policy bars clicking your
+  // own live ads (register the test device in AdMob instead if you need to verify visually).
   ADS: {
-    USE_TEST_ADS: true,
-    REWARDED_AD_UNIT_ID: 'ca-app-pub-3940256099942544/1712485313',
-    INTERSTITIAL_AD_UNIT_ID: 'ca-app-pub-3940256099942544/4411468910',
+    USE_TEST_ADS: false,
+    REWARDED_AD_UNIT_ID: 'ca-app-pub-2637666596373570/2953348777',
+    INTERSTITIAL_AD_UNIT_ID: 'ca-app-pub-2637666596373570/8093994815',
     MAX_CONTINUES_PER_RUN: 1,
     CONTINUE_OFFER_SECONDS: 5,
     INTERSTITIAL_EVERY_N_GAMEOVERS: 3,
