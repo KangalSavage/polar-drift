@@ -261,14 +261,6 @@ export class Game {
     const centerX = (this.shaftLeft + this.shaftRight) / 2;
     let ax = (centerX - this.ballX) * CONFIG.CENTER_SPRING_K;
 
-    for (const p of this.pickups) {
-      if (p.collected) continue;
-      const dy = Math.abs(p.y - this.ballScreenY);
-      if (dy >= CONFIG.PICKUP_ATTRACT_RANGE_PX) continue;
-      const proximity = 1 - dy / CONFIG.PICKUP_ATTRACT_RANGE_PX;
-      ax += (p.x - this.ballX) * CONFIG.PICKUP_ATTRACT_K * proximity;
-    }
-
     for (const o of this.obstacles) {
       const dy = Math.abs(o.y - this.ballScreenY);
       if (dy >= CONFIG.MAGNET_RANGE_PX) continue;
@@ -335,15 +327,20 @@ export class Game {
     }
   }
 
+  /**
+   * Pickups are collected the instant they cross the ball's fixed line, regardless of how
+   * far off to the side they are - the player has no direct horizontal control (x is purely
+   * a byproduct of polarity vs. nearby obstacles), so requiring actual proximity would make
+   * collection mostly luck. The effects fire at the ball's own position, reading as "it flew
+   * to you", not at wherever the pickup happened to be.
+   */
   _checkPickups() {
     for (const p of this.pickups) {
-      if (p.collected) continue;
-      const dist = Math.hypot(p.x - this.ballX, p.y - this.ballScreenY);
-      if (dist >= CONFIG.BALL_RADIUS + p.radius) continue;
+      if (p.collected || p.y > this.ballScreenY) continue;
       p.collected = true;
       p.alive = false;
-      if (p.type === 'shield') this._onShieldPickup(p.x, p.y);
-      else this._onGemPickup(p.x, p.y);
+      if (p.type === 'shield') this._onShieldPickup(this.ballX, this.ballScreenY);
+      else this._onGemPickup(this.ballX, this.ballScreenY);
     }
   }
 
