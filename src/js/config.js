@@ -5,7 +5,7 @@ export const CONFIG = {
   // The ball falls at a fixed screen height; the shaft and its obstacles scroll upward
   // past it. Fractions are of the shared on-screen unit computed in Game (see _resize) -
   // keeps layout consistent across phone sizes without hardcoding pixels.
-  SHAFT_WIDTH_FRACTION: 0.64,
+  SHAFT_WIDTH_FRACTION: 0.86, // was 0.64 - untested against a real phone screen, left ~18% dead margin on each side
   BALL_SCREEN_Y_FRACTION: 0.32, // how far down the screen the ball's fixed position sits
   BALL_RADIUS: 15,
   TRAIL_LENGTH: 16, // how many past positions the motion trail remembers
